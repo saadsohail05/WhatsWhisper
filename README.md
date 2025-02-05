@@ -9,6 +9,19 @@ In today’s fast-paced world, voice messages have become a popular way to commu
 - Easy setup process
 - Automatic session management
 
+## 🏗️ System Architecture
+
+<div align="center">
+  <img src="media/system-architecture.png" alt="WhatsWhisper System Architecture">
+</div>
+
+The diagram above illustrates the flow of data in WhatsWhisper:
+1. User sends a voice message via WhatsApp
+2. WhatsApp Bot (venom-bot) receives the message
+3. Voice message is processed and sent to FastAPI server
+4. Whisper model transcribes the audio
+5. Transcribed text is sent back to the user
+
 ## 📋 Prerequisites
 
 - Python 3.8+
