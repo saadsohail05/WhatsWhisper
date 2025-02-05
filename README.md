@@ -12,7 +12,7 @@ In today’s fast-paced world, voice messages have become a popular way to commu
 ## 🏗️ System Architecture
 
 <div align="center">
-  <img src="media/diagram.png" alt="WhatsWhisper System Architecture">
+  <img src="Media/diagram.png" alt="WhatsWhisper System Architecture">
 </div>
 
 The diagram above illustrates the flow of data in WhatsWhisper:
