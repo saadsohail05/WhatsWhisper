@@ -1,4 +1,4 @@
-# WhatsWhisper
+# 🎤💬 WhatsWhisper
 
 In today’s fast-paced world, voice messages have become a popular way to communicate—offering speed and ease when typing is cumbersome—but they also present challenges in noisy or public environments where listening is not feasible, and for users with hearing impairments. WhatsWhisper addresses these issues by automatically converting WhatsApp voice messages into text using OpenAI’s Whisper model, thereby making communication more accessible and convenient, regardless of the setting.
 
