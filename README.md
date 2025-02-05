@@ -69,6 +69,11 @@ After resetting, a new QR code will appear in the terminal. Scan it with WhatsAp
 - Ensure you have scanned the QR code to connect the bot to your WhatsApp.
 - Check the logs for any error messages.
 
+## 🙏 Acknowledgments
+
+- [venom-bot](https://github.com/orkestral/venom) - Thanks to the venom-bot team for their excellent WhatsApp Web automation library that powers this project's WhatsApp integration.
+- [OpenAI Whisper](https://github.com/openai/whisper) - For providing the speech recognition model.
+
 ## 📄 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
