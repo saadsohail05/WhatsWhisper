@@ -47,59 +47,47 @@ venom
 // Main bot function that handles all message events
 function start(client) {
     console.log("🤖 WhatsApp Bot Started...");
-    let messageCount = 0;  // Track total messages received
+    const userStates = new Map();
 
     // Message event listener
     client.onMessage(async message => {
-        // Increment and log message details
-        messageCount++;
-        const senderNumber = message.from.split('@')[0];
-        console.log('\n==================================');
-        console.log(`📨 Message #${messageCount}`);
-        console.log(`📱 From: +${senderNumber}`);
-        console.log(`⏰ Time: ${new Date().toLocaleString()}`);
-
         // Handle only private messages, ignore group messages
         if (!message.isGroupMsg) {
-            // Check if message is an audio message
-            if (message.mimetype?.startsWith("audio")) {
+            // Check if message has a body before processing commands
+            if (message.body) {
+                const messageContent = message.body.toLowerCase();
+                if (messageContent === '!transcribe') {
+                    userStates.set(message.from, 'awaiting_audio');
+                    await client.sendText(message.from, 
+                        "🎤 Send any voice message and I'll transcribe it for you!"
+                    );
+                    return;
+                }
+            }
+
+            // Only process audio if user has requested transcription
+            if (message.mimetype?.startsWith("audio") && userStates.get(message.from)) {
                 try {
-                    console.log('🎵 Processing voice message...');
-                    
-                    // Extract audio from message
                     const buffer = await client.decryptFile(message);
-                    
-                    // Prepare audio data for API
                     const formData = new FormData();
                     formData.append("audio", buffer, {
                         filename: 'audio.ogg',
                         contentType: message.mimetype
                     });
 
-                    // Send to FastAPI server for transcription
                     const response = await axios.post("http://localhost:5000/transcribe", 
                         formData, 
                         { headers: formData.getHeaders() }
                     );
 
-                    // Log success and send transcription back to user
-                    console.log('✅ Successfully transcribed');
-                    console.log(`📤 Sending response to +${senderNumber}`);
                     await client.sendText(message.from, `📝 ${response.data.transcript}`);
-                    
                 } catch (error) {
-                    // Handle and log any errors
-                    console.error(`❌ Error for +${senderNumber}:`, error.message);
+                    console.error('Transcription error:', error.message);
                     await client.sendText(message.from, "⚠️ Error transcribing the audio.");
+                } finally {
+                    userStates.delete(message.from);
                 }
-            } else {
-                // Handle non-audio messages
-                console.log('⚠️ Received non-audio message');
-                await client.sendText(message.from, 
-                    "🎤 Please send voice messages only. Text or other types of messages are not supported."
-                );
             }
         }
-        console.log('==================================\n');
     });
 }

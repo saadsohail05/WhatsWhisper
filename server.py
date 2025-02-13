@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 import whisper
 import os
 
-# Initializing FastAPI application
+# Initializing FastAPI application  
 app = FastAPI()
 
 # Configuring upload directory for temporary file storage
