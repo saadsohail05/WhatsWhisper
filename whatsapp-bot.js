@@ -98,54 +98,58 @@ function start(client) {
             if (message.mimetype?.startsWith("audio") && userStates.get(message.from)?.awaiting_audio) {
                 try {
                     const userState = userStates.get(message.from);
-                    const buffer = await client.decryptFile(message);
+                    const buffer = Buffer.from(await client.decryptFile(message));
+                    
+                    // Save audio to temp file first
+                    const tempPath = './temp_audio.ogg';
+                    fs.writeFileSync(tempPath, buffer);
+                    
                     const formData = new FormData();
-                    formData.append("audio", buffer, {
-                        filename: 'audio.ogg',
-                        contentType: message.mimetype
-                    });
+                    formData.append("audio", fs.createReadStream(tempPath));
 
                     if (userState.enhance_only) {
                         try {
                             await client.sendText(message.from, "✨ Enhancing your audio...");
                             const response = await axios.post("http://localhost:5000/enhance", 
                                 formData, 
-                                { 
-                                    headers: formData.getHeaders(),
-                                    responseType: 'arraybuffer'
-                                }
+                                { responseType: 'arraybuffer' }
                             );
                             
                             // Save the enhanced audio temporarily
                             const tempFilePath = './enhanced_audio.mp3';
                             fs.writeFileSync(tempFilePath, Buffer.from(response.data));
                             
-                            // Send the enhanced audio file
-                            await client.sendVoiceBase64(
+                            // Send the audio file directly
+                            await client.sendFile(
                                 message.from,
-                                response.data.toString('base64'),
-                                'enhanced_audio'
+                                tempFilePath,
+                                'enhanced_audio.mp3',
+                                'Here is your enhanced audio'
                             );
                             
-                            // Clean up the temporary file
+                            // Clean up
                             fs.unlinkSync(tempFilePath);
-                            
-                            await client.sendText(message.from, "✨ Here's your enhanced audio!");
                         } catch (error) {
                             console.error('Enhancement error:', error);
                             await client.sendText(message.from, "⚠️ Error enhancing the audio. Please try again.");
                         }
                     } else {
-                        formData.append("enhance", userState.enhance);
+                        if (userState.enhance) {
+                            formData.append("enhance", "true");
+                        }
 
-                        const response = await axios.post("http://localhost:5000/transcribe", 
-                            formData, 
-                            { headers: formData.getHeaders() }
+                        const response = await axios.post(
+                            "http://localhost:5000/transcribe", 
+                            formData
                         );
 
                         const enhancedPrefix = response.data.enhanced ? "✨ Enhanced and transcribed:\n" : "";
                         await client.sendText(message.from, `${enhancedPrefix}📝 ${response.data.transcript}`);
                     }
+
+                    // Clean up temp file
+                    fs.unlinkSync(tempPath);
+
                 } catch (error) {
                     console.error('Processing error:', error.message);
                     await client.sendText(message.from, "⚠️ Error processing the audio.");

@@ -26,18 +26,20 @@ async def transcribe(
     # Log new request details
     print("\n=== New Transcription Request ===")
     print(f"📁 File: {audio.filename}")
-    print(f"📊 Size: {len(await audio.read())} bytes")
+    
+    # Read the file content
+    file_content = await audio.read()
+    print(f"📊 Size: {len(file_content)} bytes")
     print(f"🎵 Enhancement requested: {enhance}")
-    await audio.seek(0)  # Reset file pointer after reading
     
     # Generate temporary file path
     file_path = os.path.join(UPLOAD_FOLDER, audio.filename)
     enhanced_path = os.path.join(UPLOAD_FOLDER, "enhanced_" + audio.filename)
     
     try:
-        # Saving uploaded audio to temporary file
+        # Save the file content
         with open(file_path, "wb") as buffer:
-            buffer.write(await audio.read())
+            buffer.write(file_content)
 
         # Apply enhancement if requested
         processing_path = file_path
@@ -91,46 +93,32 @@ async def enhance_only(audio: UploadFile = File(...)):
     enhanced_path = os.path.join(UPLOAD_FOLDER, "enhanced.mp3")
     
     try:
-        # Ensure uploads directory exists
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-        
         # Save uploaded file
         with open(file_path, "wb") as buffer:
-            content = await audio.read()
-            buffer.write(content)
+            buffer.write(await audio.read())
         
         print("✨ Enhancing audio...")
         success = enhance_audio(file_path, enhanced_path)
         
         if not success or not os.path.exists(enhanced_path):
-            raise HTTPException(
-                status_code=500,
-                detail="Enhancement process failed"
-            )
+            raise HTTPException(status_code=500, detail="Enhancement failed")
         
-        # Read the enhanced file and return it
-        with open(enhanced_path, 'rb') as f:
-            enhanced_audio = f.read()
-            
-        # Clean up files
-        os.remove(file_path)
-        os.remove(enhanced_path)
-            
-        return Response(
-            content=enhanced_audio,
+        # Stream the file back
+        return FileResponse(
+            enhanced_path,
             media_type="audio/mpeg",
-            headers={
-                'Content-Disposition': 'attachment; filename="enhanced_audio.mp3"'
-            }
+            filename="enhanced_audio.mp3"
         )
     
     except Exception as e:
         print(f"Error in enhance_only: {str(e)}")
-        # Clean up files in case of error
-        for path in [file_path, enhanced_path]:
-            if os.path.exists(path):
-                os.remove(path)
         raise HTTPException(status_code=500, detail=str(e))
+    
+    finally:
+        # Clean up the original file
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        # Let FileResponse handle the enhanced file cleanup
 
 if __name__ == "__main__":
     import uvicorn
