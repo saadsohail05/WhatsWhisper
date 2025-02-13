@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
-import whisper
+# import whisper  # Commented out as we're using Groq instead
 import os
+from Whisper_groq import client  # Import the configured Groq client
 
 # Initializing FastAPI application  
 app = FastAPI()
@@ -9,8 +10,8 @@ app = FastAPI()
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Initializing Whisper for speech recognition
-model = whisper.load_model("small")
+# Whisper model initialization commented out
+# model = whisper.load_model("small")
 
 @app.post("/transcribe")
 async def transcribe(audio: UploadFile = File(...)):
@@ -29,21 +30,26 @@ async def transcribe(audio: UploadFile = File(...)):
         with open(file_path, "wb") as buffer:
             buffer.write(await audio.read())
 
-        # Processing audio with Whisper model
+        # Processing audio with Groq's Whisper API
         print("🔄 Processing audio...")
-        result = model.transcribe(
-            file_path,
-            task="transcribe",
-            fp16=False  
-        )
-        
-        # Loging success and return results
-        print(f"✅ Language detected: {result['language']}")
-        print(f"📝 Transcription complete")
+        with open(file_path, "rb") as file:
+            result = client.audio.transcriptions.create(
+                file=(file_path, file.read()),
+                model="whisper-large-v3-turbo",
+                response_format="json",
+                temperature=0.0
+            )
+        # result = model.transcribe(
+        #     file_path,
+        #     task="transcribe",
+        #     fp16=False  
+        # )
+        # Logging success and return results
+        print("📝 Transcription complete")
         
         return {
-            "transcript": result["text"],
-            "detected_language": result["language"]
+            "transcript": result.text,
+            "detected_language": "en"
         }
     
     except Exception as e:
@@ -57,9 +63,6 @@ async def transcribe(audio: UploadFile = File(...)):
         # Cleaning up temporary files
         if os.path.exists(file_path):
             os.remove(file_path)
-        print("=== Request Complete ===\n")
-
-# Starting server when run directly
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000)
