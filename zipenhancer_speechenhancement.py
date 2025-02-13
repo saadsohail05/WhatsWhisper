@@ -32,5 +32,12 @@ ans = pipeline(
     device='cpu'
 )
 
-result = ans('audio.mpga', output_path='output.wav')
-print("done")
+def enhance_audio(input_path, output_path):
+    """Enhance audio using the ZipEnhancer model."""
+    try:
+        result = ans(input_path, output_path=output_path)
+        print("✨ Audio enhancement complete")
+        return True
+    except Exception as e:
+        print(f"❌ Enhancement error: {str(e)}")
+        return False
