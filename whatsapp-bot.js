@@ -63,6 +63,7 @@ function start(client) {
                         `📝 *!transcribe* - Transcribe an audio message\n` +
                         `✨ *!transcribe -e* - Enhance and transcribe an audio message\n` +
                         `🎵 *!enhance* - Enhance audio quality only\n` +
+                        `📅 *!schedule* - Schedule tasks from voice message\n` +
                         `❓ *!commands* or *!help* - Show this help message`;
                     
                     await client.sendText(message.from, helpMessage);
@@ -92,6 +93,15 @@ function start(client) {
                     await client.sendText(message.from, responseText);
                     return;
                 }
+
+                if (messageContent === '!schedule') {
+                    userStates.set(message.from, {
+                        awaiting_audio: true,
+                        schedule: true
+                    });
+                    await client.sendText(message.from, "🗣️ Send a voice message with your tasks!");
+                    return;
+                }
             }
 
             // Only process audio if user has requested transcription
@@ -107,7 +117,32 @@ function start(client) {
                     const formData = new FormData();
                     formData.append("audio", fs.createReadStream(tempPath));
 
-                    if (userState.enhance_only) {
+                    if (userState.schedule) {
+                        try {
+                            await client.sendText(message.from, "🎯 Processing your scheduling request...");
+                            
+                            // First get the transcription
+                            const transcriptionResponse = await axios.post(
+                                "http://localhost:5000/transcribe", 
+                                formData
+                            );
+
+                            // Send the text for task scheduling with proper JSON content type
+                            const scheduleResponse = await axios.post(
+                                "http://localhost:5000/schedule_tasks",
+                                { text: transcriptionResponse.data.transcript },
+                                { headers: { 'Content-Type': 'application/json' } }
+                            );
+
+                            // Send back the scheduling results
+                            await client.sendText(message.from, 
+                                "📅 Task Scheduling Results:\n\n" + scheduleResponse.data.summary
+                            );
+                        } catch (error) {
+                            console.error('Scheduling error:', error);
+                            await client.sendText(message.from, "⚠️ Error scheduling tasks. Please try again.");
+                        }
+                    } else if (userState.enhance_only) {
                         try {
                             await client.sendText(message.from, "✨ Enhancing your audio...");
                             const response = await axios.post("http://localhost:5000/enhance", 

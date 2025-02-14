@@ -1,11 +1,15 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, Body
 from fastapi.responses import FileResponse
 from fastapi import HTTPException
-# import whisper  # Commented out as we're using Groq instead
 import os
-from Whisper_groq import client  # Import the configured Groq client
+from Whisper_groq import client
 from zipenhancer_speechenhancement import enhance_audio
 from fastapi.responses import Response
+from phi3_5 import client as phi_client, process_tasks
+from googlecalendar import GoogleCalendarAPI
+from datetime import datetime
+import json
+from pydantic import BaseModel
 
 # Initializing FastAPI application  
 app = FastAPI()
@@ -16,6 +20,16 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Whisper model initialization commented out
 # model = whisper.load_model("small")
+
+# Initialize Google Calendar API at startup
+print("\n=== Initializing Google Calendar API ===")
+try:
+    calendar_api = GoogleCalendarAPI()
+    print("✅ Google Calendar API initialized successfully")
+except Exception as e:
+    print(f"❌ Failed to initialize Google Calendar API: {str(e)}")
+    print("Please ensure credentials.json is in the correct location")
+    raise
 
 @app.post("/transcribe")
 async def transcribe(
@@ -119,6 +133,53 @@ async def enhance_only(audio: UploadFile = File(...)):
         if os.path.exists(file_path):
             os.remove(file_path)
         # Let FileResponse handle the enhanced file cleanup
+
+class TranscriptionRequest(BaseModel):
+    text: str
+
+@app.post("/schedule_tasks")
+async def schedule_tasks(request: TranscriptionRequest):
+    try:
+        print("\n=== New Scheduling Request ===")
+        print(f"📝 Input text: {request.text}")
+        
+        try:
+            tasks = process_tasks(request.text)
+            if not tasks:
+                return {"status": "warning", "summary": "No tasks could be extracted from the input"}
+        except Exception as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"AI model error: {str(e)}"
+            )
+
+        scheduled_tasks = []
+        for task in tasks:
+            print(f"\n🔍 Task Details:")
+            print(f"📌 Title: {task['title']}")
+            print(f"📅 Date: {task['date']}")
+            print(f"⏰ Start: {task['start_time']}")
+            print(f"⏰ End: {task['end_time']}")
+            print(f"📝 Description: {task['description']}")
+            
+            start_datetime = datetime.strptime(f"{task['date']} {task['start_time']}", "%Y-%m-%d %H:%M")
+            end_time = datetime.strptime(f"{task['date']} {task['end_time']}", "%Y-%m-%d %H:%M")
+            duration = int((end_time - start_datetime).total_seconds() / 60)
+            print(f"⏱️ Duration: {duration} minutes")
+            
+            scheduled_tasks.append(f"✅ {task['title']} on {task['date']} at {task['start_time']}")
+
+        summary = "\n".join(scheduled_tasks)
+        print("\n=== Final Summary ===")
+        print(summary)
+        return {"status": "success", "summary": summary}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = f"Unexpected error: {str(e)}"
+        print(f"❌ {error_msg}")
+        raise HTTPException(status_code=500, detail=error_msg)
 
 if __name__ == "__main__":
     import uvicorn
