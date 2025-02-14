@@ -7,8 +7,9 @@ __pycache__/
 tokens/
 uploads/
 
-# Environment
+# Environment and credentials
 .env
+credentials.json
 venv/
 env/
 myenv/
