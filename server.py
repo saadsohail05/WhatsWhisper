@@ -167,7 +167,19 @@ async def schedule_tasks(request: TranscriptionRequest):
             duration = int((end_time - start_datetime).total_seconds() / 60)
             print(f"⏱️ Duration: {duration} minutes")
             
-            scheduled_tasks.append(f"✅ {task['title']} on {task['date']} at {task['start_time']}")
+            # Create Google Calendar event
+            try:
+                event = calendar_api.create_event(
+                    summary=task['title'],
+                    description=task['description'],
+                    start_time=start_datetime,
+                    duration_minutes=duration
+                )
+                scheduled_tasks.append(f"✅ {task['title']} on {task['date']} at {task['start_time']} (Added to Calendar)")
+                print(f"📅 Event created in Google Calendar: {event.get('htmlLink')}")
+            except Exception as e:
+                print(f"❌ Failed to create calendar event: {str(e)}")
+                scheduled_tasks.append(f"⚠️ {task['title']} on {task['date']} at {task['start_time']} (Calendar creation failed)")
 
         summary = "\n".join(scheduled_tasks)
         print("\n=== Final Summary ===")
