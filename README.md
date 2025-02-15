@@ -1,14 +1,14 @@
 # 🎤💬 WhatsWhisper
-In today’s fast-paced world, voice messages offer a quick and convenient way to communicate when typing isn’t practical. However, they often fall short in noisy or public environments and can be challenging for those with hearing impairments. WhatsWhisper transforms your WhatsApp voice messages into versatile, actionable content by leveraging Groq's Whisper API for precise transcription and Alibaba's ZipEnhancer for superior audio quality. Beyond simple transcription, it empowers you to schedule tasks effortlessly with Google Calendar integration and intelligently parse complex instructions using Microsoft's Phi-3.5—all while supporting multiple languages and ensuring seamless session management. Experience a smarter, more accessible way to communicate and stay organized, wherever you are.
+In today’s fast-paced world, voice messages offer a quick and convenient way to communicate when typing isn’t practical. However, they often fall short in noisy or public environments and can be challenging for those with hearing impairments. WhatsWhisper transforms your WhatsApp voice messages into versatile, actionable content by leveraging OpenAI's Whisper for precise transcription and Alibaba's ZipEnhancer for superior audio quality. Beyond simple transcription, it empowers you to schedule tasks effortlessly with Google Calendar integration and intelligently parse complex instructions using Microsoft's Phi-3.5—all while supporting multiple languages and ensuring seamless session management. Experience a smarter, more accessible way to communicate and stay organized, wherever you are.
 
 ## 🚀 Features
 
-- 📝 Voice message transcription using Groq's Whisper API
-- ✨ Audio quality enhancement using SOTA Speech Enhancement Model ZipEnhancer by Speech Lab, Alibaba Group, China
-- 📅 Voice-powered task scheduling with Google Calendar integration
-- 🤖 Smart task parsing using Microsoft's Phi-3.5
-- 🌐 Multi-language support
-- 🔄 Easy session management
+- Voice message transcription using OpenAI's Whisper
+- Audio quality enhancement using SOTA Speech Enhancement Model ZipEnhancer by Speech Lab, Alibaba Group, China
+- Voice-powered task scheduling with Google Calendar integration
+- Smart task parsing using Microsoft's Phi-3.5
+- Multi-language support
+- Easy session management
 
 ## 🏗️ System Architecture
 
@@ -30,7 +30,7 @@ The diagram above illustrates the flow of data in WhatsWhisper:
 - npm
 - FFmpeg
 - Google Calendar API credentials
-- Groq API key
+- Groq API key (for OpenAI's Whisper)
 - OpenRouter API key (for Phi-3.5)
 
 ## 🛠️ Installation
@@ -139,6 +139,7 @@ The bot supports the following commands:
 
 - [venom-bot](https://github.com/orkestral/venom) - For WhatsApp Web automation
 - [Groq](https://groq.com/) - For the Whisper API integration
+- [OpenAI](https://openai.com/research/whisper) - For the Whisper speech recognition model
 - [ZipEnhancer](https://zipenhancer.github.io/ZipEnhancer/) - For audio enhancement
 - [Microsoft](https://www.microsoft.com/) - For the Phi-3.5 model
 - [Google Calendar API](https://developers.google.com/calendar) - For scheduling integration
