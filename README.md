@@ -4,7 +4,7 @@ In today’s fast-paced world, voice messages offer a quick and convenient way t
 ## 🚀 Features
 
 - Voice message transcription using OpenAI's Whisper
-- Audio quality enhancement using SOTA Speech Enhancement Model ZipEnhancer by Speech Lab, Alibaba Group, China
+- Acoustic Noise Suppression & Audio Quality Enhancement using the SOTA Speech Enhancement Model "ZipEnhancer" by Speech Lab, Alibaba Group, China
 - Voice-powered task scheduling with Google Calendar integration
 - Smart task parsing using Microsoft's Phi-3.5
 - Multi-language support
