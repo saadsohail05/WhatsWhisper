@@ -14,6 +14,9 @@ client = OpenAI(
 
 # Modify prompt to use $-style placeholders
 prompt = Template('''Act as a JSON task parser. Convert the following text into scheduled tasks.
+Parse relative dates like "today", "tomorrow", "next week" into actual dates (YYYY-MM-DD format).
+Current date reference: ${current_date}
+
 Output MUST be a valid JSON array using DOUBLE QUOTES only. Example:
 [
     {

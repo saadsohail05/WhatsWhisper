@@ -7,9 +7,10 @@ from zipenhancer_speechenhancement import enhance_audio
 from fastapi.responses import Response
 from phi3_5 import client as phi_client, process_tasks
 from googlecalendar import GoogleCalendarAPI
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 from pydantic import BaseModel
+# import whisper
 
 # Initializing FastAPI application  
 app = FastAPI()
@@ -18,8 +19,9 @@ app = FastAPI()
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Whisper model initialization commented out
 # model = whisper.load_model("small")
+
+
 
 # Initialize Google Calendar API at startup
 print("\n=== Initializing Google Calendar API ===")
@@ -76,6 +78,7 @@ async def transcribe(
         #     task="transcribe",
         #     fp16=False  
         # )
+
         # Logging success and return results
         print("📝 Transcription complete")
         
@@ -132,7 +135,6 @@ async def enhance_only(audio: UploadFile = File(...)):
         # Clean up the original file
         if os.path.exists(file_path):
             os.remove(file_path)
-        # Let FileResponse handle the enhanced file cleanup
 
 class TranscriptionRequest(BaseModel):
     text: str
@@ -153,7 +155,10 @@ async def schedule_tasks(request: TranscriptionRequest):
                 detail=f"AI model error: {str(e)}"
             )
 
+        # Get local timezone
+        local_tz = pytz.timezone('Asia/Karachi')  # Adjust this to your local timezone
         scheduled_tasks = []
+        
         for task in tasks:
             print(f"\n🔍 Task Details:")
             print(f"📌 Title: {task['title']}")
@@ -162,12 +167,18 @@ async def schedule_tasks(request: TranscriptionRequest):
             print(f"⏰ End: {task['end_time']}")
             print(f"📝 Description: {task['description']}")
             
+            # Create naive datetime objects
             start_datetime = datetime.strptime(f"{task['date']} {task['start_time']}", "%Y-%m-%d %H:%M")
             end_time = datetime.strptime(f"{task['date']} {task['end_time']}", "%Y-%m-%d %H:%M")
+            
+            # Localize the datetime objects
+            start_datetime = local_tz.localize(start_datetime)
+            end_time = local_tz.localize(end_time)
+            
             duration = int((end_time - start_datetime).total_seconds() / 60)
             print(f"⏱️ Duration: {duration} minutes")
             
-            # Create Google Calendar event
+            # Create event in Google Calendar
             try:
                 event = calendar_api.create_event(
                     summary=task['title'],
