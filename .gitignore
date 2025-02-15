@@ -10,6 +10,7 @@ uploads/
 # Environment and credentials
 .env
 credentials.json
+token.pickle
 venv/
 env/
 myenv/
