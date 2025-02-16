@@ -1,14 +1,16 @@
-# 🗣️ WhatsWhisper
+# WhatsWhisper
 In today’s fast-paced world, voice messages offer a quick and convenient way to communicate when typing isn’t practical. However, they often fall short in noisy or public environments and can be challenging for those with hearing impairments. WhatsWhisper transforms your WhatsApp voice messages into versatile, actionable content by leveraging OpenAI's Whisper for precise transcription and Alibaba's ZipEnhancer for superior audio quality. Beyond simple transcription, it empowers you to schedule tasks effortlessly with Google Calendar integration and intelligently parse complex instructions using Microsoft's Phi-3.5.Experience a smarter, more accessible way to communicate and stay organized, wherever you are.
 
-## 🚀 Features
+📝 Read the detailed blog post about WhatsWhisper on [Medium](https://saadsohail5104.medium.com/from-messy-audio-to-smart-tasks-how-whatswhisper-revolutionizes-whatsapp-voice-notes-a7461bfcfa7c)
+
+## Features
 
 - Voice message transcription using OpenAI's Whisper
 - Acoustic Noise Suppression & Audio Quality Enhancement using the SOTA Speech Enhancement Model "ZipEnhancer" by Speech Lab, Alibaba Group, China
 - Voice-powered task scheduling with Google Calendar integration
 - Smart task parsing using Microsoft's Phi-3.5
 
-## 🏗️ System Architecture
+## System Architecture
 
 <div align="center">
   <img src="Media/diagram.png" alt="WhatsWhisper System Architecture">
@@ -16,12 +18,14 @@ In today’s fast-paced world, voice messages offer a quick and convenient way t
 
 The diagram above illustrates the flow of data in WhatsWhisper:
 1. User sends a voice message via WhatsApp
-2. WhatsApp Bot (venom-bot) receives the message
-3. Voice message is processed and sent to FastAPI server
-4. Whisper model transcribes the audio
-5. Transcribed text is sent back to the user
+2. Message is received by WhatsApp Web API via venom-bot
+3. Audio file is passed through ZipEnhancer for quality improvement (optional)
+4. Enhanced audio is processed by Whisper ASR for transcription
+5. If scheduling command detected, text is analyzed by Phi-3.5 for task extraction
+6. Extracted task details are used to create Google Calendar events
+7. Final response (transcription/confirmation) is sent back to the user
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Python 3.8+
 - Node.js 14+
@@ -31,7 +35,7 @@ The diagram above illustrates the flow of data in WhatsWhisper:
 - Groq API key (for OpenAI's Whisper)
 - OpenRouter API key (for Phi-3.5)
 
-## 🛠️ Installation
+## Installation
 
 1. Clone the repository:
    ```bash
@@ -64,30 +68,14 @@ The diagram above illustrates the flow of data in WhatsWhisper:
 
 5. Scan the QR code that appears in the terminal with your WhatsApp to connect.
 
-## 🔄 Reset WhatsApp Session
+## Reset WhatsApp Session
 
 To reset the WhatsApp session, you have two options:
 
 1. Using the reset flag (recommended):
-```bash
-node whatsapp-bot.js -2. Manual reset:
    ```bash
-   rm -rf tokens/
-   node whatsapp-bot.js
+   node whatsapp-bot.js --reset
    ```
-
-After resetting, a new QR code will appear in the terminal. Scan it with WhatsApp to establish a new session.
-
--reset2. Manual reset:
-   ```bash
-   rm -rf tokens/
-   node whatsapp-bot.js
-   ```
-
-After resetting, a new QR code will appear in the terminal. Scan it with WhatsApp to establish a new session.
-
-
-```
 
 2. Manual reset:
    ```bash
@@ -97,7 +85,7 @@ After resetting, a new QR code will appear in the terminal. Scan it with WhatsAp
 
 After resetting, a new QR code will appear in the terminal. Scan it with WhatsApp to establish a new session.
 
-## 📖 Usage
+##  Usage
 
 The bot supports the following commands:
 
@@ -124,7 +112,7 @@ The bot supports the following commands:
 5. **Help**
    - Send `!commands` or `!help` to see available commands
 
-## 🛠️ Troubleshooting
+##  Troubleshooting
 
 - Verify all API keys are correctly set in `.env`
 - Ensure Google Calendar credentials are properly configured
@@ -133,7 +121,7 @@ The bot supports the following commands:
 - If the bot is not responding, make sure both FastAPI server and WhatsApp bot are running
 - Ensure you have scanned the QR code to connect the bot to WhatsApp
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - [venom-bot](https://github.com/orkestral/venom) - For WhatsApp Web automation
 - [Groq](https://groq.com/) - For the Whisper API integration
@@ -142,6 +130,6 @@ The bot supports the following commands:
 - [Microsoft](https://www.microsoft.com/) - For the Phi-3.5 model
 - [Google Calendar API](https://developers.google.com/calendar) - For scheduling integration
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
