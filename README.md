@@ -25,6 +25,10 @@ The diagram above illustrates the flow of data in WhatsWhisper:
 6. Extracted task details are used to create Google Calendar events
 7. Final response (transcription/confirmation) is sent back to the user
 
+## Demo Video
+
+Check out WhatsWhisper in action: [Watch Demo](https://drive.google.com/file/d/1HB8Xfx8XUVExNLZJT_wO8RVUV78lPIWw/view?usp=sharing)
+
 ## Prerequisites
 
 - Python 3.8+
